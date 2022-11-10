@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location</title>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        #left-top {
+            position: absolute;
+            margin-top: 20px;
+            margin-left: 10px;
+            padding: 0;
+            left: 10px;
+            top: 0;
+            z-index: 1;
+        }
+        
+        #zoomBtn{
+            display: block;
+            width: 25px;
+        }
+
+        #container {
+            padding: 0;
+            margin: 0 auto 0;
+            height: 90%;
+        }
+
+        #top {
+            margin-top: 10px;
+            margin-bottom: 5px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        #middle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #middleLeft {
+            position: absolute;
+            margin-left: 0;
+            padding: 0;
+            left: 20px;
+        }
+
+        #middleCenter{
+            margin: 10px;
+        }
+
+        #middleRight {
+            position: absolute;
+            padding: 0;
+            margin-right: 0;
+            right: 20px;
+        }
+
+        #bottom {
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        #imgMap {
+            margin: 0;
+            padding: 0;
+            background-image: url("https://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile/0/0/0");
+
+            width: 70vh;
+            height: 70vh;
+
+            background-repeat: no-repeat;
+            background-size: 1000%;
+
+            background-position-x: 50%;
+            background-position-y: 50%;
+
+            border: 1px solid rgb(230, 230, 230);
+
+            text-align: center;
+            color: rgb(100, 100, 100);
+            font-size: 7vh;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #arMoveUp, #arMoveDown, #arMoveLeft, #arMoveRight, #zoomIn, #zoomOut, #homeBtn {
+            width: 25px;
+            height: 25px;
+            padding: 0px;
+            background-color: white;
+            border: 1px solid rgb(230, 230, 230);
+            border-radius: 4px;
+            
+            cursor: pointer;
+        }
+
+        #arMoveUp:hover, #arMoveDown:hover, #arMoveLeft:hover, #arMoveRight:hover,#zoomIn:hover, #zoomOut:hover, #homeBtn:hover {
+            background-color: rgb(230, 230, 230);
+            transition: 0.2s;
+        }
+
+        #homeBtn {
+            color: rgb(100, 100, 100);
+            font-size: 7px;
+        }
+
+        button{
+            width: 25px;
+            height: 25px;
+            border: none;
+            border-radius: 4px;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="main">
+        <div id="left-top">
+            <div id="zoomBtn">
+                <button id="zoomInBtn"><canvas id="zoomIn"></canvas></button>
+                <button id="zoomOutBtn"><canvas id="zoomOut"></canvas></button>
+            </div>
+            <button id="homeBtn" style="width: 27px;height:27px;">HOME</button>
+        </div>
+    
+        <div id="container">
+
+            <div id="top"><button id="moveUpBtn"><canvas id="arMoveUp"></canvas></button></div>
+
+            <div id="middle">
+                <div id="middleLeft">   <button id="moveLeftBtn"><canvas id="arMoveLeft"></canvas></button></div>
+                <div id="middleCenter"> <div id="imgMap" draggable="true" ondragstart="dragStart(event.offsetX, event.offsetY)" ondragend="dragEnd(event.offsetX, event.offsetY)">Drag Me!</div></div>
+                <div id="middleRight">  <button id="moveRightBtn"><canvas id="arMoveRight"></canvas></button></div>
+            </div>
+
+            <div id="bottom"><button id="moveDownBtn"><canvas id="arMoveDown"></canvas></button></div>
+
+        </div>
+    </div>
+    
+
+    <!-- SCRIPTS -->
+    <script>
+        // Function Button Move
+        function moveUp(){
+            centerY = centerY + 10;
+            if(centerY < 100){
+                imgMapElem.style.backgroundPositionY = centerY+strPercen;
+            }
+            else {
+                console.log(centerY);
+            }
+        }
+
+        function moveDown(){
+            centerY = centerY - 10;
+            if(centerY > 0){
+                imgMapElem.style.backgroundPositionY = centerY+strPercen;
+            }
+            else {
+                console.log(centerY);
+            }
+        }
+
+        function moveLeft(){
+            centerX = centerX - 10;
+            if(centerX > 0){
+                imgMapElem.style.backgroundPositionX = centerX+strPercen;
+            }
+            else {
+                console.log(centerX);
+            }
+        }
+
+        function moveRight(){
+            centerX = centerX + 10;
+            if(centerX < 100){
+                imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                console.log(centerX);
+            }
+            else {
+                console.log(centerX);
+            }
+        }
+
+        function setHome(){
+            imgMapElem.style.backgroundPositionX = "50%";
+            imgMapElem.style.backgroundPositionY = "50%";
+            imgMapElem.style.backgroundSize = "1000%";
+        }
+
+        function zoomIn(){
+            console.log("zoomIn");
+            if(centerZoom < 2000){
+                console.log("test")
+                centerZoom = centerZoom + 200;
+                imgMapElem.style.backgroundSize = centerZoom+strPercen;
+            }
+            else{
+                console.log(centerZoom);
+            }
+        }
+
+        function zoomOut(){
+            console.log("zoomOut");
+            if(centerZoom > 0){
+                centerZoom = centerZoom - 200;
+                if(centerZoom == 0){
+                    return imgMapElem.style.backgroundSize = "100%";
+                }
+                imgMapElem.style.backgroundSize = centerZoom+strPercen;
+            }
+            else{
+                imgMapElem.style.backgroundSize = "100%";
+                console.log(centerZoom);
+            }
+        }
+        
+        //Function Create Arrow Button
+        function arrow(d){
+            var arrEle;
+            var ctx;
+            if(d == "up") {
+                arrElem = document.getElementById("arMoveUp");
+                ctx = arrElem.getContext("2d");
+                arrElem.style.transform = "rotate(0deg)";
+            }
+            else if(d == "down"){
+                arrElem = document.getElementById("arMoveDown");
+                ctx = arrElem.getContext("2d");
+                arrElem.style.transform = "rotate(180deg)";
+            }
+            else if(d == "left"){
+                arrElem = document.getElementById("arMoveLeft");
+                ctx = arrElem.getContext("2d");
+                arrElem.style.transform = "rotate(270deg)";
+            }
+            else if(d == "right"){
+                arrElem = document.getElementById("arMoveRight");
+                ctx = arrElem.getContext("2d");
+                arrElem.style.transform = "rotate(90deg)";
+            }
+            else {
+                console.log("error");
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(140, 10);
+            ctx.lineTo(20, 75);
+            ctx.lineTo(90, 75);
+            ctx.lineTo(90, 140);
+            ctx.lineTo(210, 140);
+            ctx.lineTo(210, 75);
+            ctx.lineTo(280,75);
+            ctx.closePath();
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgb(100, 100, 100)';
+            ctx.stroke();
+            ctx.fillStyle = 'rgb(100, 100, 100)';
+            ctx.fill();
+        }
+
+        //Function Create Zoom Button
+        function zoomInBtn(){
+            var zoomInElem = document.getElementById("zoomIn");
+            var ctx = zoomInElem.getContext("2d");
+
+            ctx.beginPath();
+            ctx.moveTo(130,20);
+            ctx.lineTo(130,65);
+            ctx.lineTo(30, 65);
+            ctx.lineTo(30, 85);
+            ctx.lineTo(130, 85);
+            ctx.lineTo(130, 130);
+            ctx.lineTo(170,130);
+            ctx.lineTo(170, 85);
+            ctx.lineTo(270,85);
+            ctx.lineTo(270,65);
+            ctx.lineTo(170,65);
+            ctx.lineTo(170,20);
+            ctx.closePath();
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgb(100, 100, 100)';
+            ctx.stroke();
+            ctx.fillStyle = 'rgb(100, 100, 100)';
+            ctx.fill();
+
+        }zoomInBtn();
+        
+        function zoomOutBtn(){
+            var zoomOutElem = document.getElementById("zoomOut");
+            var ctx = zoomOutElem.getContext("2d");
+            
+            ctx.beginPath();
+            ctx.moveTo(30, 65);
+            ctx.lineTo(30, 85);
+            ctx.lineTo(270, 85);
+            ctx.lineTo(270, 65);
+            ctx.closePath();
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgb(100, 100, 100)';
+            ctx.stroke();
+            ctx.fillStyle = 'rgb(100, 100, 100)';
+            ctx.fill();
+
+        }zoomOutBtn();
+
+        function dragStart(x, y){
+            console.log("dragStart",x, y)
+            x1 = x;
+            y1 = y;
+        }
+
+        function dragEnd(x, y){
+            console.log("dragEnd",x, y)
+            x2 = x;
+            y2 = y;
+            dragDist();
+        }
+        
+        function dragDist(){
+            var dx = x2 - x1;
+            var dy = y2 - y1;
+            console.log("Distance",dx, dy);
+            dragMove(dx, dy);
+        }
+
+        function dragMove(dx, dy) {
+            console.log("dragMove");
+            dx = dx/10;
+            dy = dy/10;
+            
+            if(dx>0 && dy==0){
+                //move left
+                centerX = centerX - dx;
+                if(centerX > 0){
+                    imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                }
+                else {
+                    console.log(centerX);
+                }
+            }
+            else if(dx>0 && dy>0){
+                //move left-up
+                centerX = centerX - dx;
+                centerY = centerY - dy;
+                if(centerX > 0 && centerY < 100){
+                    imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                    imgMapElem.style.backgroundPositionY = centerY+strPercen;
+                }
+                else {
+                    console.log(centerX, centerY);
+                }
+
+            }
+            else if(dx>0 && dy<0){
+                //move left-down
+                centerX = centerX - dx;
+                centerY = centerY - dy;
+                if(centerX > 0 && centerY > 0){
+                    imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                    imgMapElem.style.backgroundPositionY = centerY+strPercen;
+                }
+                else {
+                    console.log(centerX, centerY);
+                }
+            }
+            else if(dx==0 && dy>0){
+                //move up
+                centerY = centerY - dy;
+                if(centerY < 100){
+                    imgMapElem.style.backgroundPositionY = centerY+strPercen;
+                }
+                else {
+                    console.log(centerY);
+                }
+            }
+            else if(dx==0 && dy<0){
+                //move down
+                centerY = centerY - dy;
+                if(centerY > 0){
+                    imgMapElem.style.backgroundPositionY = centerY+strPercen;
+                }
+                else {
+                    console.log(centerY);
+                }
+            }
+            else if(dx<0 && dy==0){
+                //move right
+                centerX = centerX - dx;
+                if(centerX < 100){
+                    imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                }
+                else {
+                    console.log(centerX);
+                }
+            }
+            else if(dx<0 && dy>0){
+                //move right-up
+                centerX = centerX - dx;
+                centerY = centerY - dy;
+                if(centerX < 100 && centerY < 100){
+                    imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                    imgMapElem.style.backgroundPositionY = centerY+strPercen;
+                }
+                else {
+                    console.log(centerX, centerY);
+                }
+            }
+            else if(dx<0 && dy<0){
+                //move right-down
+                centerX = centerX - dx;
+                centerY = centerY - dy;
+                if(centerX < 100 && centerY > 0){
+                    imgMapElem.style.backgroundPositionX = centerX+strPercen;
+                    imgMapElem.style.backgroundPositionY = centerY+strPercen;
+                }
+                else {
+                    console.log(centerX);
+                }
+                
+            }
+            else{
+                console.log("not move");
+            }
+            
+        }
+
+        //Start Program
+        var imgMapElem = document.getElementById("imgMap");
+
+        var centerX = 50;
+        var centerY = 50;
+        var strPercen = "%";
+        var centerZoom = 1000;
+        var direction = "";
+
+        //drag variable
+        var x1, x2, y1, y2 = 0;
+
+        //Element Button
+        arrow(direction = "up");
+        var moveUpElem = document.getElementById("moveUpBtn");
+        moveUpElem.addEventListener("click", moveUp);
+        
+        arrow(direction = "down");
+        var moveDownElem = document.getElementById("moveDownBtn");
+        moveDownElem.addEventListener("click", moveDown);
+
+        arrow(direction = "left");
+        var moveLeftElem = document.getElementById("moveLeftBtn");
+        moveLeftElem.addEventListener("click", moveLeft);
+
+        arrow(direction = "right");
+        var moveRightElem = document.getElementById("moveRightBtn");
+        moveRightElem.addEventListener("click", moveRight);
+
+        var homeElem = document.getElementById("homeBtn");
+        homeElem.addEventListener("click", setHome);
+
+        var zoomInElem = document.getElementById("zoomInBtn");
+        zoomInElem.addEventListener("click", zoomIn);
+
+        var zoomOutElem = document.getElementById("zoomOutBtn");
+        zoomOutElem.addEventListener("click", zoomOut);
+   
+    </script>
+</body>
+</html>
